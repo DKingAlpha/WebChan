@@ -28,10 +28,11 @@ func GetUrlArgs(args string) map[string]string {
 	q := map[string]string{}
 	for _, kv :=  range strings.Split(args, "&") {
 		kva := strings.SplitN(kv, "=", 2)
-		if len(kva) != 2 {
-			continue
+		v := ""
+		if len(kva) == 2 {
+			v = kva[1]
 		}
-		q[kva[0]] = kva[1]
+		q[kva[0]] = v
 	}
 	return q
 }

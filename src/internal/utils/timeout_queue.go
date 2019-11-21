@@ -110,7 +110,7 @@ func (tq *TimeoutQueue) Enqueue(chanMsg *ChanMessage) string {
 	}
 }
 
-func (tq *TimeoutQueue) GetData() string {
+func (tq *TimeoutQueue) GetData(showTime bool) string {
 	tq.lock.Lock()
 	defer tq.lock.Unlock()
 	if tq.Msgs == nil {
@@ -118,12 +118,16 @@ func (tq *TimeoutQueue) GetData() string {
 	}
 	s := ""
 	for _, i := range tq.Msgs {
-		s += fmt.Sprintf("%d:%s\n", i.T, i.M)
+		if showTime {
+			s += fmt.Sprintf("%d:%s\n", i.T, i.M)
+		} else {
+			s += fmt.Sprintln(i.M)
+		}
 	}
 	return s
 }
 
-func (tq *TimeoutQueue) GetDataFrom(from int64) string {
+func (tq *TimeoutQueue) GetDataFrom(from int64, showTime bool) string {
 	tq.lock.Lock()
 	defer tq.lock.Unlock()
 	if tq.Msgs == nil {
@@ -132,13 +136,17 @@ func (tq *TimeoutQueue) GetDataFrom(from int64) string {
 	s := ""
 	for _, i := range tq.Msgs {
 		if i.T >= from {
-			s += fmt.Sprintf("%d:%s\n", i.T, i.M)
+			if showTime {
+				s += fmt.Sprintf("%d:%s\n", i.T, i.M)
+			} else {
+				s += fmt.Sprintln(i.M)
+			}
 		}
 	}
 	return s
 }
 
-func (tq *TimeoutQueue) GetDataFromTo(from int64, to int64) string {
+func (tq *TimeoutQueue) GetDataFromTo(from int64, to int64, showTime bool) string {
 	tq.lock.Lock()
 	defer tq.lock.Unlock()
 	if tq.Msgs == nil {
@@ -147,7 +155,11 @@ func (tq *TimeoutQueue) GetDataFromTo(from int64, to int64) string {
 	s := ""
 	for _, i := range tq.Msgs {
 		if i.T >= from && i.T <= to {
-			s += fmt.Sprintf("%d:%s\n", i.T, i.M)
+			if showTime {
+				s += fmt.Sprintf("%d:%s\n", i.T, i.M)
+			} else {
+				s += fmt.Sprintln(i.M)
+			}
 		}
 	}
 	return s

@@ -26,6 +26,8 @@ func NewTimeoutQueueWithParam(channelId string, key string, perm utils.ChanPerm)
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	p := strings.Split(r.URL.Path, "/")[1:]
 	q := utils.GetUrlArgs(r.URL.RawQuery)
+
+	// get runtime method
 	key, foundKey := q["key"]
 	if !foundKey {
 		key = ""
@@ -102,13 +104,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 					_, _ = fmt.Fprintln(w, "Wrong key to channel")
 					return
 				}
+				_, showTime := q["time"]
 				switch len(p) {
 				case 2:
-					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetDataFrom(from))
+					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetDataFrom(from, showTime))
 				case 3:
-					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetDataFromTo(from, to))
+					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetDataFromTo(from, to, showTime))
 				default:
-					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetData())
+					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetData(showTime))
 				}
 			} else {
 				_, _ = fmt.Fprint(w, "")

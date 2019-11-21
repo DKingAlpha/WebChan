@@ -25,7 +25,10 @@ Append arguments to url to post/get/delete restricted channel
 
 ### key
 string
-Only people 
+
+1. POST with a key to post to a restricted channel, if it does not exists, create it.
+2. GET/DELETE a restricted channel
+
 
 ### perm
 Set corresponding char grant access to channel to people WITHOUT key:
@@ -52,7 +55,17 @@ GET /chan456
 DELETE /chan456
 ```
 
-### Notice
+### time
+Set time parameter to GET with timestamp in output
+```
+GET /chan123?time
+GET /chan123?key=123&time
+GET /chan123?key=123&time=1
+# warn: time=0 or time=false will not disable it
+GET /chan123?key=123&time=1
+```
+
+## Notice
 
 `/  ?` could not be in `channel/msg`
 
