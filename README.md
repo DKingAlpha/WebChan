@@ -1,8 +1,6 @@
 # WebChan
 A high performance web channel focused on pure data exchanging
 
-## Usage
-
 # Public Access
 ```
 POST /channel/msg

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"internal/shared_vars"
 	"internal/utils"
+	"io/ioutil"
 	"log"
 	"math"
 	"net/http"
@@ -18,8 +19,18 @@ import (
 
 var queues *sync.Map = nil
 
+
+func GetTimeoutBasedOnChannelId(channelId string) int64 {
+	factor := len(channelId)
+	if factor > 180 {
+		factor = 180
+	}
+	return int64(60*60*24*factor)
+}
+
+
 func NewTimeoutQueueWithParam(channelId string, key string, perm utils.ChanPerm) *utils.TimeoutQueue {
-	return utils.NewTimeoutQueue(channelId, 1000, 60*60*24*7, key, perm) // 7 days
+	return utils.NewTimeoutQueue(channelId, 1000, GetTimeoutBasedOnChannelId(channelId), key, perm) // 7 days
 }
 
 
@@ -41,10 +52,31 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		// write data to channel
-		if len(p) < 2 || p[1] == "" {
-			_, _ = fmt.Fprintln(w, "request url format: POST /channel/msg")
+
+		bodyb, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			bodyb = []byte("")
+		}
+		body := string(bodyb)
+		postUsage := "request url format:\nPOST /channel/msg\n\nPOST /channel\nDATA\n\nPOST /channel/data1\nDATA2"
+		if len(p) == 1 && body == "" {
+			_, _ = fmt.Fprintln(w, postUsage)
 			return
 		}
+		msg := ""
+		if len(p) >= 2 {
+			msg = p[1]
+		}
+		if msg == "" {	// reload from url
+			msg = body
+		} else {		// append body
+			msg += "\n" + body
+		}
+		if msg == "" {
+			_, _ = fmt.Fprintln(w, postUsage)
+			return
+		}
+
 		permS, foundPerm := q["perm"]
 		if foundPerm {
 			permS = ""
@@ -71,7 +103,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		chanMsg := &utils.ChanMessage{
 			Ch: p[0],
 			T: shared_vars.CurrentTime,
-			M: p[1],
+			M: msg,
 		}
 		_, _ = fmt.Fprintln(w, queue.(*utils.TimeoutQueue).Enqueue(chanMsg))
 	case "GET":
