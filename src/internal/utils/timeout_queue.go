@@ -1,4 +1,4 @@
-package types
+package utils
 
 import (
 	"fmt"
@@ -6,16 +6,6 @@ import (
 	"sync"
 	"time"
 )
-
-type TimeoutQueue struct {
-	lock    sync.Mutex
-	ChanId  string
-	Cap     int
-	Timeout int64
-	Key     string
-	Perm    ChanPerm
-	Msgs    []*Message
-}
 
 func NewTimeoutQueue(channelId string, cap int, timeout int64, key string, perm ChanPerm) *TimeoutQueue {
 	return &TimeoutQueue{

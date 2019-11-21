@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"internal/shared_vars"
-	"internal/types"
+	"internal/utils"
 	"log"
 	"math"
 	"net/http"
@@ -18,14 +18,14 @@ import (
 
 var queues *sync.Map = nil
 
-func NewTimeoutQueueWithParam(channelId string, key string, perm types.ChanPerm) *types.TimeoutQueue  {
-	return types.NewTimeoutQueue(channelId, 1000, 60*60*24*7, key, perm)	// 7 days
+func NewTimeoutQueueWithParam(channelId string, key string, perm utils.ChanPerm) *utils.TimeoutQueue {
+	return utils.NewTimeoutQueue(channelId, 1000, 60*60*24*7, key, perm) // 7 days
 }
 
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	p := strings.Split(r.URL.Path, "/")[1:]
-	q := types.GetUrlArgs(r.URL.RawQuery)
+	q := utils.GetUrlArgs(r.URL.RawQuery)
 	key, foundKey := q["key"]
 	if !foundKey {
 		key = ""
@@ -47,7 +47,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		if foundPerm {
 			permS = ""
 		}
-		perm := *types.GetPerm(permS)
+		perm := *utils.GetPerm(permS)
 
 		queue, foundPerm := queues.Load(p[0])
 		if !foundPerm {
@@ -55,23 +55,23 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			queues.Store(p[0], queue)
 		}
 		// check owner
-		if key == queue.(*types.TimeoutQueue).Key {
+		if key == queue.(*utils.TimeoutQueue).Key {
 			if foundPerm {
 				// owner is updating perm
-				queue.(*types.TimeoutQueue).Perm = perm
+				queue.(*utils.TimeoutQueue).Perm = perm
 			}
 		} else {
-			if !adminMode && queue.(*types.TimeoutQueue).Perm.W == 0 {
+			if !adminMode && queue.(*utils.TimeoutQueue).Perm.W == 0 {
 				_, _ = fmt.Fprintln(w, "Wrong key to channel")
 				return
 			}
 		}
-		chanMsg := &types.ChanMessage{
+		chanMsg := &utils.ChanMessage{
 			Ch: p[0],
 			T: shared_vars.CurrentTime,
 			M: p[1],
 		}
-		_, _ = fmt.Fprintln(w, queue.(*types.TimeoutQueue).Enqueue(chanMsg))
+		_, _ = fmt.Fprintln(w, queue.(*utils.TimeoutQueue).Enqueue(chanMsg))
 	case "GET":
 		// show data in channel
 		if len(p) < 1 {
@@ -98,17 +98,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			queue, found := queues.Load(p[0])
 			if found {
-				if !adminMode && key != queue.(*types.TimeoutQueue).Key && queue.(*types.TimeoutQueue).Perm.R == 0 {
+				if !adminMode && key != queue.(*utils.TimeoutQueue).Key && queue.(*utils.TimeoutQueue).Perm.R == 0 {
 					_, _ = fmt.Fprintln(w, "Wrong key to channel")
 					return
 				}
 				switch len(p) {
 				case 2:
-					_, _ = fmt.Fprint(w, queue.(*types.TimeoutQueue).GetDataFrom(from))
+					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetDataFrom(from))
 				case 3:
-					_, _ = fmt.Fprint(w, queue.(*types.TimeoutQueue).GetDataFromTo(from, to))
+					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetDataFromTo(from, to))
 				default:
-					_, _ = fmt.Fprint(w, queue.(*types.TimeoutQueue).GetData())
+					_, _ = fmt.Fprint(w, queue.(*utils.TimeoutQueue).GetData())
 				}
 			} else {
 				_, _ = fmt.Fprint(w, "")
@@ -120,8 +120,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if !adminMode {
-			if queue, found := queues.Load(p[0]); found && key != queue.(*types.TimeoutQueue).Key &&
-				queue.(*types.TimeoutQueue).Perm.D == 0{
+			if queue, found := queues.Load(p[0]); found && key != queue.(*utils.TimeoutQueue).Key &&
+				queue.(*utils.TimeoutQueue).Perm.D == 0{
 				_, _ = fmt.Fprintln(w, "Wrong key to channel")
 				return
 			}
@@ -148,7 +148,7 @@ func main() {
 		log.Fatalln("missing argument addr:port")
 	}
 
-	queues = types.LoadSyncMap(shared_vars.DumpJSONPath)
+	queues = utils.LoadSyncMap(shared_vars.DumpJSONPath)
 	if queues == nil {
 		queues = &sync.Map{}
 	}
@@ -187,8 +187,8 @@ func queuesCleaner() {
 			// clean one channel every seconds
 			case <- time.After(time.Second / 10):
 				shared_vars.CurrentTime = time.Now().Unix()
-				queue.(*types.TimeoutQueue).CleanTimeout()
-				if queue.(*types.TimeoutQueue).Empty() {
+				queue.(*utils.TimeoutQueue).CleanTimeout()
+				if queue.(*utils.TimeoutQueue).Empty() {
 					queues.Delete(key)
 				}
 			}
@@ -208,6 +208,6 @@ func signalCatcher() {
 	)
 	s := <-sigc
 	log.Println("Caught signal: ", s.String())
-	types.DumpSyncMap(queues, shared_vars.DumpJSONPath)
+	utils.DumpSyncMap(queues, shared_vars.DumpJSONPath)
 	os.Exit(0)
 }
