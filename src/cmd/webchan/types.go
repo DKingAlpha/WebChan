@@ -149,6 +149,7 @@ func (tq *ActivityLog) Rank() *[]ChanAct{
 	i := 0
 	for channel, act := range tq.Acts {
 		flat[i] = ChanAct{channel, act}
+		i++
 	}
 	sort.Slice(flat, func(i, j int) bool {
 		return flat[i].Act.Count <  flat[j].Act.Count
