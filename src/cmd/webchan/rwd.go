@@ -160,10 +160,15 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		if !adminMode {
-			if queue, found := queues.Load(p[0]); found && key != queue.(*RTQ).Key &&
-				queue.(*RTQ).Perm.D == 0{
-				_, _ = fmt.Fprintln(w, "Private channel")
-				return
+			if queue, found := queues.Load(p[0]); found && queue.(*RTQ).Perm.D == 0 {
+				if queue.(*RTQ).Key == "" {
+					_, _ = fmt.Fprintln(w, "No delete permission on this public channel")
+					return
+				}
+				if queue.(*RTQ).Key != key {
+					_, _ = fmt.Fprintln(w, "Private channel")
+					return
+				}
 			}
 		}
 		queues.Delete(p[0])
