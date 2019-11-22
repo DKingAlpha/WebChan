@@ -27,8 +27,15 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	<th>{{.Act.GetTime}}</th>
 </tr>
 {{end}}
-
 </table>
+
+<br><br>
+<pre>
+# Usage
+curl -X POST  qaq.link/chan1/msg1
+curl -X POST  qaq.link/chan1  --data-binary msg2
+curl -X POST  qaq.link/chan1/msg2?key=PASSWORD
+</pre>
 </html>`
 	tmpl, err := template.New("status").Parse(tpl)
 	if err != nil {

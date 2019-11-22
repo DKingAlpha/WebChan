@@ -35,24 +35,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		body := string(bodyb)
 		postUsage := "request url format:\nPOST /channel/msg\n\nPOST /channel\nDATA\n\nPOST /channel/data1\nDATA2"
-		if len(p) < 2 && body == "" {
-			_, _ = fmt.Fprintln(w, postUsage)
-			return
-		}
+
 		msg := ""
-		if len(p) >= 2 {
-			msg = p[1]
+		// try append msg in url
+		if len(p) >= 2 && p[1] != "" {
+			msg += p[1]
 		}
-		if msg == "" {	// reload from url
-			msg = body
-		} else {		// append body
+		if body != "" {
 			msg += "\n" + body
 		}
-		if msg == "" {
-			_, _ = fmt.Fprintln(w, postUsage)
-			return
-		}
 
+		validRequest := false
 		permS, foundPerm := q["perm"]
 
 		// create new channel if not exists
@@ -60,33 +53,44 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		if !foundQueue {
 			// create new channel with proper permission
 			var perm *ChanPerm = nil
-			if foundPerm {
-				perm = GetPerm(permS)
-			} else {
-				if foundKey {
-					// private, perm default 0,0,0
+			if foundKey {
+				// private, perm default 0,0,0
+				if foundPerm {
+					perm = GetPerm(permS)
+				} else {
 					perm = &ChanPerm{}
-				}else {
-					// public, perm default 1,1,1
-					perm = &ChanPerm{1,1,1}
 				}
+			} else {
+				// public, perm default 1,1,1
+				perm = &ChanPerm{1,1,1}
 			}
 			queue = NewRTQWithParam(p[0], key, perm)
 			queues.Store(p[0], queue)
+			validRequest = true
 		} else {
-			// channel exists, update perm
-			// check owner
-			if key == queue.(*RTQ).Key {
+			// channel exists
+
+			// everyone could change property of public channel. consider protecting it by key=XXX&perm=r
+			if queue.(*RTQ).Key == "" || queue.(*RTQ).Key == key {
+				// public channel or owner of private channel
 				if foundPerm {
-					// owner is updating perm
 					queue.(*RTQ).Perm = *GetPerm(permS)
+					validRequest = true
+				}
+				if foundKey {
+					queue.(*RTQ).Key = key
 				}
 			} else {
 				if !adminMode && queue.(*RTQ).Perm.W == 0 {
-					_, _ = fmt.Fprintln(w, "Wrong key to channel")
+					_, _ = fmt.Fprintln(w, "Private channel")
 					return
 				}
 			}
+		}
+		// still not matching a valid update request. the only operation left is to push msg and its nil
+		if !validRequest && msg == "" {
+			_, _ = fmt.Fprintln(w, postUsage)
+			return
 		}
 
 		// log this to public log only when someone else could read
@@ -125,9 +129,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			queue, found := queues.Load(p[0])
 			if found {
-				if !adminMode && key != queue.(*RTQ).Key && queue.(*RTQ).Perm.R == 0 {
-					_, _ = fmt.Fprintln(w, "Wrong key to channel")
-					return
+				if !adminMode {
+					if queue.(*RTQ).Perm.R == 0 {
+						if queue.(*RTQ).Key == "" {
+							_, _ = fmt.Fprintln(w, "No read permission on this public channel")
+							return
+						}
+						if queue.(*RTQ).Key != key {
+							_, _ = fmt.Fprintln(w, "Private channel")
+							return
+						}
+					}
 				}
 				_, showTime := q["time"]
 				switch len(p) {
@@ -150,7 +162,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		if !adminMode {
 			if queue, found := queues.Load(p[0]); found && key != queue.(*RTQ).Key &&
 				queue.(*RTQ).Perm.D == 0{
-				_, _ = fmt.Fprintln(w, "Wrong key to channel")
+				_, _ = fmt.Fprintln(w, "Private channel")
 				return
 			}
 		}

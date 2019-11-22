@@ -137,7 +137,7 @@ func (tq *ActivityLog) Clean() {
 		flat[i] = ChanAct{channel, act}
 	}
 	sort.Slice(flat, func(i, j int) bool {
-		return flat[i].Act.LastTime < flat[j].Act.LastTime
+		return flat[i].Act.LastTime > flat[j].Act.LastTime
 	})
 	// remove 10% oldest
 	trimmed := flat[:len(flat)*9/10]
@@ -157,7 +157,7 @@ func (tq *ActivityLog) Rank() *[]ChanAct{
 		i++
 	}
 	sort.Slice(flat, func(i, j int) bool {
-		return flat[i].Act.Count <  flat[j].Act.Count
+		return flat[i].Act.Count >  flat[j].Act.Count
 	})
 	return &flat
 }
