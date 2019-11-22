@@ -41,6 +41,26 @@ func GetPerm(perm string) *ChanPerm {
 	return &cp
 }
 
+func (p* ChanPerm) String() string {
+	perm := ""
+	if p.R != 0 {
+		perm += "r"
+	} else {
+		perm += "-"
+	}
+	if p.W != 0 {
+		perm += "w"
+	} else {
+		perm += "-"
+	}
+	if p.D != 0 {
+		perm += "d"
+	} else {
+		perm += "-"
+	}
+	return perm
+}
+
 func GetUrlArgs(args string) map[string]string {
 	q := map[string]string{}
 	for _, kv :=  range strings.Split(args, "&") {
@@ -93,25 +113,25 @@ type ActivityLog struct {
 	Acts    map[string]*Activity
 }
 
-func (tq* ActivityLog) Remove(channelId string) {
-	tq.lock.Lock()
-	defer tq.lock.Unlock()
-	delete(tq.Acts, channelId)
+func (al * ActivityLog) Remove(channelId string) {
+	al.lock.Lock()
+	defer al.lock.Unlock()
+	delete(al.Acts, channelId)
 }
 
 
-func (tq *ActivityLog) Log(channelId string) bool {
-	tq.lock.Lock()
-	defer tq.lock.Unlock()
-	if len(tq.Acts) >= tq.Cap {
+func (al *ActivityLog) Log(channelId string) bool {
+	al.lock.Lock()
+	defer al.lock.Unlock()
+	if len(al.Acts) >= al.Cap {
 		// just return false, wait for the next clean-up
 		return false
 	}
-	if act, found := tq.Acts[channelId]; found {
+	if act, found := al.Acts[channelId]; found {
 		act.Count++
 		act.LastTime = shared_vars.CurrentTime
 	} else {
-		tq.Acts[channelId] = &Activity{
+		al.Acts[channelId] = &Activity{
 			Count:    1,
 			LastTime: shared_vars.CurrentTime,
 		}
@@ -124,16 +144,16 @@ type ChanAct struct {
 	Act  *Activity
 }
 
-func (tq *ActivityLog) Clean() {
-	tq.lock.Lock()
-	defer tq.lock.Unlock()
-	if len(tq.Acts) < tq.Cap {
+func (al *ActivityLog) Clean() {
+	al.lock.Lock()
+	defer al.lock.Unlock()
+	if len(al.Acts) < al.Cap {
 		return
 	}
 
-	flat := make([]ChanAct, len(tq.Acts))
+	flat := make([]ChanAct, len(al.Acts))
 	i := 0
-	for channel, act := range tq.Acts {
+	for channel, act := range al.Acts {
 		flat[i] = ChanAct{channel, act}
 	}
 	sort.Slice(flat, func(i, j int) bool {
@@ -141,18 +161,18 @@ func (tq *ActivityLog) Clean() {
 	})
 	// remove 10% oldest
 	trimmed := flat[:len(flat)*9/10]
-	tq.Acts = map[string]*Activity{}
+	al.Acts = map[string]*Activity{}
 	for _, kv := range trimmed {
-		tq.Acts[kv.Chan] = kv.Act
+		al.Acts[kv.Chan] = kv.Act
 	}
 }
 
-func (tq *ActivityLog) Rank() *[]ChanAct{
-	tq.lock.Lock()
-	defer tq.lock.Unlock()
-	flat := make([]ChanAct, len(tq.Acts))
+func (al *ActivityLog) Rank() *[]ChanAct{
+	al.lock.Lock()
+	defer al.lock.Unlock()
+	flat := make([]ChanAct, len(al.Acts))
 	i := 0
-	for channel, act := range tq.Acts {
+	for channel, act := range al.Acts {
 		flat[i] = ChanAct{channel, act}
 		i++
 	}
@@ -183,9 +203,9 @@ func LoadActivityLog(path string) *ActivityLog {
 	return &f
 }
 
-func (tq *ActivityLog) Dump(path string) {
+func (al *ActivityLog) Dump(path string) {
 	log.Println("Dumping activity to ", path)
-	data, err := json.Marshal(tq)
+	data, err := json.Marshal(al)
 	if err != nil {
 		log.Printf("Failed to marshal activity: %v\n", err)
 		return

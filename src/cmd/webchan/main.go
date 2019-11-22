@@ -10,7 +10,6 @@ import (
 
 var queues *sync.Map = nil
 
-
 func GetTimeoutBasedOnChannelId(channelId string) int64 {
 	factor := len(channelId)
 	if factor > 180 {

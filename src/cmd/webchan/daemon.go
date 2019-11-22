@@ -21,7 +21,7 @@ func statusReporter() {
 	}
 	for {
 		select {
-		case <-time.After(time.Minute):
+		case <-time.After(5*time.Minute):
 			log.Printf("Active Channel: %d\n", syncMapCount(queues))
 		}
 	}

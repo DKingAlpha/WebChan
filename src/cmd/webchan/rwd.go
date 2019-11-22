@@ -106,9 +106,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		// show data in channel
 		if len(p) == 0 || p[0] == "" {
-			statusHandler(w, r)
+			if adminMode {
+				adminHandler(w, r)
+			} else {
+				statusHandler(w, r)
+			}
 			return
 		}
+
 		if len(p) >= 1 {
 			var from int64 = 0
 			var to int64 = math.MaxInt64

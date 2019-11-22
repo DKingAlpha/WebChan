@@ -10,7 +10,40 @@ import (
 // 7 days activity
 var activityLog *ActivityLog = nil
 
-
+func adminHandler(w http.ResponseWriter, r *http.Request) {
+	tmpMap := map[string]*RTQ{}
+	queues.Range(func(key, queue interface{}) bool {
+		if !queue.(*RTQ).Empty() {
+			tmpMap[key.(string)] = queue.(*RTQ)
+		}
+		return true
+	})
+	tpl := `<html>
+<table border=1 cellpadding=8 cellspacing=0>
+<tr>
+	<th>Channel</th>
+	<th>Key</th>
+	<th>Perm</th>
+</tr>
+{{range $channelId, $rtq := .}}
+<tr>
+	<th><a href="/{{$channelId}}?key={{$rtq.Key}}">{{$channelId}}</a></th>
+	<th>{{$rtq.Key}}</th>
+	<th>{{$rtq.Perm.String}}</th>
+</tr>
+{{end}}
+</table>
+</html>
+`
+	tmpl, err := template.New("admin").Parse(tpl)
+	if err != nil {
+		log.Fatalf("Failed to init tpl for status: %v\n", err)
+	}
+	err = tmpl.Execute(w, tmpMap)
+	if err != nil {
+		_,_ = fmt.Fprintf(w, "Failed to get status: %v\n", err)
+	}
+}
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	tpl := `<html>
@@ -77,7 +110,7 @@ curl qaq.link/chan1/msg2?key=PASSWORD
 </html>`
 	tmpl, err := template.New("status").Parse(tpl)
 	if err != nil {
-		log.Fatal("Failed to init tpl for status")
+		log.Fatalf("Failed to init tpl for status: %v\n", err)
 	}
 	chanActs := activityLog.Rank()
 	err = tmpl.Execute(w, *chanActs)
