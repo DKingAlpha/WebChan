@@ -1,4 +1,4 @@
-package utils
+package main
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ func LoadSyncMap(path string) *sync.Map {
 		log.Printf("Failed to load file from %s : %v\n", path, err)
 		return nil
 	}
-	tmpMap := map[string]*TimeoutQueue{}
+	tmpMap := map[string]*RTQ{}
 	if err := json.Unmarshal(data, &tmpMap); err != nil {
 		log.Printf("Failed to unmarshal data from %s : %v\n", path, err)
 		return nil
@@ -30,10 +30,10 @@ func LoadSyncMap(path string) *sync.Map {
 
 func DumpSyncMap(p *sync.Map, path string) {
 	log.Println("Dumping data to ", path)
-	tmpMap := map[string]*TimeoutQueue{}
+	tmpMap := map[string]*RTQ{}
 	p.Range(func(key, queue interface{}) bool {
-		if !queue.(*TimeoutQueue).Empty() {
-			tmpMap[key.(string)] = queue.(*TimeoutQueue)
+		if !queue.(*RTQ).Empty() {
+			tmpMap[key.(string)] = queue.(*RTQ)
 		}
 		return true
 	})

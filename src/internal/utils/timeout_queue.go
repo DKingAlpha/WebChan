@@ -3,21 +3,9 @@ package utils
 import (
 	"fmt"
 	"internal/shared_vars"
-	"sync"
 	"time"
 )
 
-func NewTimeoutQueue(channelId string, cap int, timeout int64, key string, perm ChanPerm) *TimeoutQueue {
-	return &TimeoutQueue{
-		lock:    sync.Mutex{},
-		ChanId:  channelId,
-		Cap:     cap,
-		Timeout: timeout,
-		Key:     key,
-		Perm:    perm,
-		Msgs:    nil,
-	}
-}
 
 func (tq *TimeoutQueue) Empty() bool {
 	tq.lock.Lock()
@@ -110,6 +98,7 @@ func (tq *TimeoutQueue) Enqueue(chanMsg *ChanMessage) string {
 	}
 }
 
+
 func (tq *TimeoutQueue) GetData(showTime bool) string {
 	tq.lock.Lock()
 	defer tq.lock.Unlock()
@@ -164,3 +153,4 @@ func (tq *TimeoutQueue) GetDataFromTo(from int64, to int64, showTime bool) strin
 	}
 	return s
 }
+
