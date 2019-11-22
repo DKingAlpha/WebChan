@@ -93,7 +93,7 @@ type ActivityLog struct {
 	Acts    map[string]*Activity
 }
 
-func (tq* ActivityLog) Remove(channelId string) bool {
+func (tq* ActivityLog) Remove(channelId string) {
 	tq.lock.Lock()
 	defer tq.lock.Unlock()
 	delete(tq.Acts, channelId)
