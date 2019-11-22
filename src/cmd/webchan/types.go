@@ -93,6 +93,11 @@ type ActivityLog struct {
 	Acts    map[string]*Activity
 }
 
+func (tq* ActivityLog) Remove(channelId string) bool {
+	tq.lock.Lock()
+	defer tq.lock.Unlock()
+	delete(tq.Acts, channelId)
+}
 
 
 func (tq *ActivityLog) Log(channelId string) bool {

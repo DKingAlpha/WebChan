@@ -155,6 +155,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		queues.Delete(p[0])
+		activityLog.Remove(p[0])
 		_, _ = fmt.Fprintln(w, "OK")
 	default:
 		_, _ = fmt.Fprintln(w, "Unsupported HTTP Method: " + r.Method)
