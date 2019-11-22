@@ -27,7 +27,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.Method {
-	case "POST":
+	case "POST", "PUT", "OPTIONS":
 		// write data to channel
 		bodyb, err := ioutil.ReadAll(r.Body)
 		if err != nil {

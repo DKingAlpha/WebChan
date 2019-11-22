@@ -88,7 +88,7 @@ Data are organized by "channel", with "timeout", "capability" and "access contro
 10. For a private channel, default value: perm is none
 11. msg_timeout=len(channel_id) days
 12. Timeout msg will be removed from channel. Channel without msgs will be released(DELETE) soon
-
+13. You may feel like to use PUT instead of POST, or OPTIONS while updating key/perm. They are just alias of POST here.
 
 #### Example
 # create a new public channel
