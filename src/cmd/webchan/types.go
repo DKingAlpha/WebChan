@@ -161,7 +161,7 @@ func LoadActivityLog(path string) *ActivityLog {
 	log.Println("Loading activity from ", path)
 	f := ActivityLog{
 		Cap:     100,
-		Timeout: 1*24*60*60,
+		Timeout: shared_vars.ActivityTimeout,
 		Acts:    map[string]*Activity{},
 	}
 	data, err := ioutil.ReadFile(path)
@@ -185,6 +185,6 @@ func (tq *ActivityLog) Dump(path string) {
 		return
 	}
 	if err := ioutil.WriteFile(path, data, os.ModePerm); err != nil {
-		log.Printf("Failed to dump activity to %s : %v\n", path, err)
+		log.Printf("Failed to dump activity to %s: %v\n", path, err)
 	}
 }
