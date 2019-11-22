@@ -5,8 +5,9 @@ import "time"
 var CurrentTime = time.Now().Unix()
 
 const (
-	AntiSpamPeriod = 30
+	AntiSpamPeriod      = 30
 	AntiSpamPeriodLimit = 100
-	DumpJSONPath = "db.json"
-	AdminPassword = "DKingAlpha"
+	DumpDBPath          = "db.json"
+	DumpActivityPath    = "activity.json"
+	AdminPassword       = "DKingAlpha"
 )

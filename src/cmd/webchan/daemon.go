@@ -68,6 +68,7 @@ func signalCatcher() {
 	)
 	s := <-sigc
 	log.Println("Caught signal: ", s.String())
-	DumpSyncMap(queues, shared_vars.DumpJSONPath)
+	DumpSyncMap(queues, shared_vars.DumpDBPath)
+	activityLog.Dump(shared_vars.DumpActivityPath)
 	os.Exit(0)
 }

@@ -1,8 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"internal/shared_vars"
 	"internal/utils"
+	"io/ioutil"
+	"log"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -150,4 +154,37 @@ func (tq *ActivityLog) Rank() *[]ChanAct{
 		return flat[i].Act.Count <  flat[j].Act.Count
 	})
 	return &flat
+}
+
+
+func LoadActivityLog(path string) *ActivityLog {
+	log.Println("Loading activity from ", path)
+	f := ActivityLog{
+		Cap:     100,
+		Timeout: 1*24*60*60,
+		Acts:    map[string]*Activity{},
+	}
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Printf("Failed to load activity from %s: %v\n", path, err)
+		return &f
+	}
+	if err := json.Unmarshal(data, &f); err != nil {
+		log.Printf("Failed to unmarshal activity: %v\n", err)
+		return &f
+	}
+	log.Printf("Loaded %s\n", path)
+	return &f
+}
+
+func (tq *ActivityLog) Dump(path string) {
+	log.Println("Dumping activity to ", path)
+	data, err := json.Marshal(tq)
+	if err != nil {
+		log.Printf("Failed to marshal activity: %v\n", err)
+		return
+	}
+	if err := ioutil.WriteFile(path, data, os.ModePerm); err != nil {
+		log.Printf("Failed to dump activity to %s : %v\n", path, err)
+	}
 }

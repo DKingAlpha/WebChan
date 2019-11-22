@@ -8,15 +8,13 @@ import (
 )
 
 // 7 days activity
-var activityLog = ActivityLog{
-	Cap:     100,
-	Timeout: 1*24*60*60,
-	Acts:    map[string]*Activity{},
-}
+var activityLog *ActivityLog = nil
+
+
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	tpl := `<html>
-<table>
+<table border=1 cellpadding=8 cellspacing=0>
 <tr>
 	<th>Channel</th>
 	<th>Count</th>

@@ -9,18 +9,18 @@ import (
 )
 
 func LoadSyncMap(path string) *sync.Map {
-	log.Println("Loading data from ", path)
+	log.Println("Loading map from ", path)
+	f := sync.Map{}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Printf("Failed to load file from %s : %v\n", path, err)
-		return nil
+		log.Printf("Failed to load map from %s: %v\n", path, err)
+		return &f
 	}
 	tmpMap := map[string]*RTQ{}
 	if err := json.Unmarshal(data, &tmpMap); err != nil {
-		log.Printf("Failed to unmarshal data from %s : %v\n", path, err)
-		return nil
+		log.Printf("Failed to unmarshal map: %v\n", err)
+		return &f
 	}
-	f := sync.Map{}
 	for key, value := range tmpMap {
 		f.Store(key, value)
 	}
@@ -29,7 +29,7 @@ func LoadSyncMap(path string) *sync.Map {
 }
 
 func DumpSyncMap(p *sync.Map, path string) {
-	log.Println("Dumping data to ", path)
+	log.Println("Dumping map to ", path)
 	tmpMap := map[string]*RTQ{}
 	p.Range(func(key, queue interface{}) bool {
 		if !queue.(*RTQ).Empty() {
@@ -39,10 +39,10 @@ func DumpSyncMap(p *sync.Map, path string) {
 	})
 	data, err := json.Marshal(tmpMap)
 	if err != nil {
-		log.Printf("Failed to marshal data from %s : %v\n", path, err)
+		log.Printf("Failed to marshal map: %v\n", err)
 		return
 	}
 	if err := ioutil.WriteFile(path, data, os.ModePerm); err != nil {
-		log.Printf("Failed to dump file to %s : %v\n", path, err)
+		log.Printf("Failed to dump map to %s: %v\n", path, err)
 	}
 }

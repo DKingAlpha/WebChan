@@ -40,10 +40,8 @@ func main() {
 		log.Fatalln("missing argument addr:port")
 	}
 
-	queues = LoadSyncMap(shared_vars.DumpJSONPath)
-	if queues == nil {
-		queues = &sync.Map{}
-	}
+	queues = LoadSyncMap(shared_vars.DumpDBPath)
+	activityLog = LoadActivityLog(shared_vars.DumpActivityPath)
 
 	go signalCatcher()
 	go queuesCleaner()
