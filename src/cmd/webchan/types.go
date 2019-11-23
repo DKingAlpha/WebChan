@@ -155,6 +155,7 @@ func (al *ActivityLog) Clean() {
 	i := 0
 	for channel, act := range al.Acts {
 		flat[i] = ChanAct{channel, act}
+		i++
 	}
 	sort.Slice(flat, func(i, j int) bool {
 		return flat[i].Act.LastTime > flat[j].Act.LastTime

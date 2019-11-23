@@ -7,7 +7,6 @@ import (
 	"net/http"
 )
 
-// 7 days activity
 var activityLog *ActivityLog = nil
 
 func adminHandler(w http.ResponseWriter, r *http.Request) {
