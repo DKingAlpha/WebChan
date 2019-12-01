@@ -36,6 +36,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		body := string(bodyb)
 		postUsage := "request url format:\nPOST /channel/msg\n\nPOST /channel\nDATA\n\nPOST /channel/data1\nDATA2"
 
+		if p[0] == "tool" {
+			_, _ = fmt.Fprintln(w, "Forbidden channel :", p[0])
+			return
+		}
+
+		if p[0] == "" {
+			_, _ = fmt.Fprintln(w, postUsage)
+			return
+		}
+
+
 		msg := ""
 		// try append msg in url
 		if len(p) >= 2 && p[1] != "" {
