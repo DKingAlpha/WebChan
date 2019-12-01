@@ -48,7 +48,6 @@ func queuesCleaner() {
 func activityCleaner() {
 	for {
 		select {
-		// clean one channel every 10 seconds
 		case <- time.After(time.Second*10):
 			shared_vars.CurrentTime = time.Now().Unix()
 			activityLog.Clean()
@@ -68,6 +67,7 @@ func signalCatcher() {
 	)
 	s := <-sigc
 	log.Println("Caught signal: ", s.String())
+
 	DumpSyncMap(queues, shared_vars.DumpDBPath)
 	activityLog.Dump(shared_vars.DumpActivityPath)
 	os.Exit(0)

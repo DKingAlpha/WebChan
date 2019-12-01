@@ -109,7 +109,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			if adminMode {
 				adminHandler(w, r)
 			} else {
-				statusHandler(w, r)
+				indexHandler(w, r)
 			}
 			return
 		}

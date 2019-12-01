@@ -9,7 +9,7 @@ import (
 )
 
 func LoadSyncMap(path string) *sync.Map {
-	log.Println("Loading map from ", path)
+	log.Println("Loading map from", path)
 	f := sync.Map{}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -29,9 +29,10 @@ func LoadSyncMap(path string) *sync.Map {
 }
 
 func DumpSyncMap(p *sync.Map, path string) {
-	log.Println("Dumping map to ", path)
+	log.Println("Dumping map to", path)
 	tmpMap := map[string]*RTQ{}
 	p.Range(func(key, queue interface{}) bool {
+		queue.(*RTQ).CleanTimeout()
 		if !queue.(*RTQ).Empty() {
 			tmpMap[key.(string)] = queue.(*RTQ)
 		}

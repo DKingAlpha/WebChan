@@ -185,7 +185,7 @@ func (al *ActivityLog) Rank() *[]ChanAct{
 
 
 func LoadActivityLog(path string) *ActivityLog {
-	log.Println("Loading activity from ", path)
+	log.Println("Loading activity from", path)
 	f := ActivityLog{
 		Cap:     100,
 		Timeout: shared_vars.ActivityTimeout,
@@ -205,7 +205,8 @@ func LoadActivityLog(path string) *ActivityLog {
 }
 
 func (al *ActivityLog) Dump(path string) {
-	log.Println("Dumping activity to ", path)
+	log.Println("Dumping activity to", path)
+	al.Clean()
 	data, err := json.Marshal(al)
 	if err != nil {
 		log.Printf("Failed to marshal activity: %v\n", err)
