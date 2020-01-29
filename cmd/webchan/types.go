@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	"internal/shared_vars"
-	"internal/utils"
+	"github.com/DKingCN/WebChan/internal/shared_vars"
+	"github.com/DKingCN/WebChan/internal/utils"
 	"io/ioutil"
 	"log"
-	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -19,7 +18,6 @@ type ChanPerm struct {
 	W int
 	D int
 }
-
 
 func GetPerm(perm string) *ChanPerm {
 	cp := ChanPerm{
@@ -41,7 +39,7 @@ func GetPerm(perm string) *ChanPerm {
 	return &cp
 }
 
-func (p* ChanPerm) String() string {
+func (p *ChanPerm) String() string {
 	perm := ""
 	if p.R != 0 {
 		perm += "r"
@@ -63,7 +61,7 @@ func (p* ChanPerm) String() string {
 
 func GetUrlArgs(args string) map[string]string {
 	q := map[string]string{}
-	for _, kv :=  range strings.Split(args, "&") {
+	for _, kv := range strings.Split(args, "&") {
 		kva := strings.SplitN(kv, "=", 2)
 		v := ""
 		if len(kva) == 2 {
@@ -74,12 +72,11 @@ func GetUrlArgs(args string) map[string]string {
 	return q
 }
 
-
 // RestrictedTimeoutQueue
 type RTQ struct {
 	utils.TimeoutQueue
-	Key     string
-	Perm    ChanPerm
+	Key  string
+	Perm ChanPerm
 }
 
 func NewRTQ(channelId string, cap int, timeout int64, key string, perm ChanPerm) *RTQ {
@@ -90,11 +87,10 @@ func NewRTQ(channelId string, cap int, timeout int64, key string, perm ChanPerm)
 			Timeout: timeout,
 			Msgs:    nil,
 		},
-		Key:          key,
-		Perm:         perm,
+		Key:  key,
+		Perm: perm,
 	}
 }
-
 
 type Activity struct {
 	Count    int64
@@ -113,12 +109,11 @@ type ActivityLog struct {
 	Acts    map[string]*Activity
 }
 
-func (al * ActivityLog) Remove(channelId string) {
+func (al *ActivityLog) Remove(channelId string) {
 	al.lock.Lock()
 	defer al.lock.Unlock()
 	delete(al.Acts, channelId)
 }
-
 
 func (al *ActivityLog) Log(channelId string) bool {
 	al.lock.Lock()
@@ -168,7 +163,7 @@ func (al *ActivityLog) Clean() {
 	}
 }
 
-func (al *ActivityLog) Rank() *[]ChanAct{
+func (al *ActivityLog) Rank() *[]ChanAct {
 	al.lock.Lock()
 	defer al.lock.Unlock()
 	flat := make([]ChanAct, len(al.Acts))
@@ -178,11 +173,10 @@ func (al *ActivityLog) Rank() *[]ChanAct{
 		i++
 	}
 	sort.Slice(flat, func(i, j int) bool {
-		return flat[i].Act.Count >  flat[j].Act.Count
+		return flat[i].Act.Count > flat[j].Act.Count
 	})
 	return &flat
 }
-
 
 func LoadActivityLog(path string) *ActivityLog {
 	log.Println("Loading activity from", path)
@@ -212,7 +206,7 @@ func (al *ActivityLog) Dump(path string) {
 		log.Printf("Failed to marshal activity: %v\n", err)
 		return
 	}
-	if err := ioutil.WriteFile(path, data, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(path, data, 0644); err != nil {
 		log.Printf("Failed to dump activity to %s: %v\n", path, err)
 	}
 }

@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/DKingCN/WebChan/internal/shared_vars"
+	"github.com/DKingCN/WebChan/internal/utils"
 	"io/ioutil"
 	"math"
 	"net/http"
 	"strconv"
 	"strings"
-	"internal/shared_vars"
-	"internal/utils"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -53,7 +53,11 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			msg += p[1]
 		}
 		if body != "" {
-			msg += "\n" + body
+			if msg == "" {
+				msg += body
+			} else {
+				msg += "\n" + body
+			}
 		}
 
 		validRequest := false
@@ -113,6 +117,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			T: shared_vars.CurrentTime,
 			M: msg,
 		}
+		QueueWSNotifyChan<-chanMsg
 		_, _ = fmt.Fprintln(w, queue.(*RTQ).Enqueue(chanMsg))
 	case "GET":
 		// show data in channel

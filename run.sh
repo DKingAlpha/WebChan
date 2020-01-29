@@ -1,6 +1,3 @@
 #!/usr/bin/bash
 
-script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
-export GOPATH=$script_dir
-
-go run cmd/webchan 0.0.0.0:80
+go run github.com/DKingCN/WebChan/cmd/webchan 127.0.0.1:7005

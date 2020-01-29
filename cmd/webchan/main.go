@@ -1,7 +1,7 @@
 package main
 
 import (
-	"internal/shared_vars"
+	"github.com/DKingCN/WebChan/internal/shared_vars"
 	"log"
 	"net/http"
 	"os"
@@ -23,7 +23,6 @@ func NewRTQWithParam(channelId string, key string, perm *ChanPerm) *RTQ {
 	return NewRTQ(channelId, 1000, GetTimeoutBasedOnChannelId(channelId), key, *perm)
 }
 
-
 func limitClient(handler http.HandlerFunc, clientNum int) http.HandlerFunc {
 	sema := make(chan bool, clientNum)
 	return func(w http.ResponseWriter, req *http.Request) {
@@ -32,7 +31,6 @@ func limitClient(handler http.HandlerFunc, clientNum int) http.HandlerFunc {
 		handler(w, req)
 	}
 }
-
 
 func main() {
 	if len(os.Args) != 2 {
@@ -46,10 +44,16 @@ func main() {
 	go queuesCleaner()
 	go activityCleaner()
 	go statusReporter()
+	go WSNotifyDaemon()
 
 	addr := os.Args[1]
 	http.HandleFunc("/", limitClient(rootHandler, 200))
+	http.Handle("/websocket", limitWSClient(wsHandler, 200))
+	http.Handle("/websocket/", limitWSClient(wsHandler, 200))
 	http.HandleFunc("/tool", limitClient(toolHandler, 200))
 	http.HandleFunc("/tool/", limitClient(toolHandler, 200))
+	http.HandleFunc("/recent", limitClient(recentHandler, 200))
+	http.HandleFunc("/recent/", limitClient(recentHandler, 200))
+
 	log.Fatal(http.ListenAndServe(addr, nil))
 }

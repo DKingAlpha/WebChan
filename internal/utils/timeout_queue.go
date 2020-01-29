@@ -2,7 +2,7 @@ package utils
 
 import (
 	"fmt"
-	"internal/shared_vars"
+	"github.com/DKingCN/WebChan/internal/shared_vars"
 	"time"
 )
 
@@ -91,6 +91,7 @@ func (tq *TimeoutQueue) Enqueue(chanMsg *ChanMessage) string {
 			M: chanMsg.M,
 		})
 	}
+
 	if len(tq.Msgs) == tq.Cap {
 		return "OK(Full)"
 	} else {

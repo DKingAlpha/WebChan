@@ -63,6 +63,10 @@ GET /chan123?key=123&time=1
 GET /chan123?key=123&time=1
 ```
 
+
+### websocket
+connect to `ws://ip:port/websocket/channel_name` to subscribe new data.
+
 ## Notice
 
 `/  ?` could not be in `channel/msg`

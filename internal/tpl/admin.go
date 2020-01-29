@@ -1,8 +1,8 @@
 package tpl
 
 import (
+	"github.com/DKingCN/WebChan/internal/shared_vars"
 	"html/template"
-	"internal/shared_vars"
 	"log"
 )
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	"os"
 	"sync"
 )
 
@@ -43,7 +42,7 @@ func DumpSyncMap(p *sync.Map, path string) {
 		log.Printf("Failed to marshal map: %v\n", err)
 		return
 	}
-	if err := ioutil.WriteFile(path, data, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(path, data, 0644); err != nil {
 		log.Printf("Failed to dump map to %s: %v\n", path, err)
 	}
 }

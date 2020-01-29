@@ -15,7 +15,6 @@ func init() {
 	TplIndex = t
 }
 
-
 const tplIndex string = `<html>
 <body>
 <table border=1 cellpadding=8 cellspacing=0>

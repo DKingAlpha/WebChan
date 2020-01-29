@@ -1,8 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"internal/tpl"
+	"github.com/DKingCN/WebChan/internal/tpl"
 	"net/http"
 )
 
@@ -33,4 +34,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func toolHandler(w http.ResponseWriter, r *http.Request) {
 	// p := strings.Split(r.URL.Path, "/")[1:]
 	_, _ = fmt.Fprintf(w, tpl.TplTool)
+}
+
+func recentHandler(w http.ResponseWriter, r *http.Request) {
+	chanActs := activityLog.Rank()
+	jsondata, err := json.Marshal(chanActs)
+	if err == nil {
+		_, _ = fmt.Fprintf(w, string(jsondata))
+	}
 }
