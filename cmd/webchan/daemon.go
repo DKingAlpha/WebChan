@@ -13,6 +13,7 @@ import (
 )
 
 func statusReporter() {
+	lastCount := 0
 	syncMapCount := func(p *sync.Map) int {
 		count := 0
 		p.Range(func(key, _ interface{}) bool {
@@ -23,7 +24,11 @@ func statusReporter() {
 	}
 	for {
 		time.Sleep(5*time.Minute)
-		log.Printf("Active Channel: %d\n", syncMapCount(queues))
+		newCount := syncMapCount(queues)
+		if newCount != lastCount {
+			log.Printf("Active Channel: %d\n", newCount)
+			lastCount = newCount
+		}
 	}
 }
 
